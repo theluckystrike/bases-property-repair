@@ -1,0 +1,32 @@
+# Team project tracker. Status values: planned, active, done, archived.
+filters:
+  and:
+    - file.inFolder("Bases Property Repair/Projects")
+    - note.status != "archived"
+formulas:
+  overdue: note.status != "done" && due < today()
+  label: file.name + " (" + status + ")"
+properties:
+  status:
+    displayName: Status
+  formula.overdue:
+    displayName: Overdue
+views:
+  - type: table
+    name: All projects
+    order:
+      - file.name
+      - status
+      - due
+      - formula.overdue
+    sort:
+      - property: note.status
+        direction: ASC
+  - type: table
+    name: By status
+    groupBy:
+      property: note.status
+      direction: ASC
+    order:
+      - file.name
+      - due

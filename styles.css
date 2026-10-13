@@ -1,0 +1,83 @@
+/* Styles for Bases Property Repair. Obsidian loads this file while the plugin is enabled. */
+.bpr-modal .bpr-intro,
+.bpr-modal .bpr-pro-note {
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+}
+
+.bpr-modal .bpr-pro-note {
+	margin-bottom: var(--size-4-2);
+}
+
+.bpr-modal .bpr-message {
+	margin: var(--size-4-2) 0;
+	font-weight: var(--font-semibold);
+}
+
+.bpr-modal .bpr-results {
+	max-height: 50vh;
+	overflow-y: auto;
+}
+
+.bpr-modal .bpr-file {
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-s);
+	padding: var(--size-4-2);
+	margin-bottom: var(--size-4-2);
+}
+
+.bpr-modal .bpr-file-head {
+	display: flex;
+	gap: var(--size-4-2);
+	align-items: center;
+}
+
+.bpr-modal .bpr-path {
+	font-weight: var(--font-semibold);
+	flex: 1;
+}
+
+.bpr-modal .bpr-status {
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+}
+
+.bpr-modal .bpr-file.is-skip .bpr-status,
+.bpr-modal .bpr-reason,
+.bpr-modal .bpr-result.is-stale,
+.bpr-modal .bpr-result.is-error {
+	color: var(--text-error);
+}
+
+.bpr-modal .bpr-result.is-written {
+	color: var(--text-success);
+}
+
+.bpr-modal .bpr-changes,
+.bpr-modal .bpr-notes {
+	margin: var(--size-4-1) 0 0;
+	padding-left: var(--size-4-5);
+	font-size: var(--font-ui-small);
+}
+
+.bpr-modal .bpr-where {
+	color: var(--text-muted);
+	margin-right: var(--size-4-2);
+}
+
+.bpr-modal .bpr-arrow {
+	margin: 0 var(--size-4-1);
+}
+
+.bpr-modal .bpr-before {
+	text-decoration: line-through;
+	color: var(--text-muted);
+}
+
+.bpr-modal .bpr-note {
+	color: var(--text-warning);
+}
+
+.modal.bpr-modal {
+	--dialog-width: 820px;
+}

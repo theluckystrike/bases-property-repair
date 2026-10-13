@@ -1,0 +1,17 @@
+filters:
+  or:
+    - note["status"] == "reading"
+    - file.hasTag("status")
+formulas:
+  status: if(progress >= 100, "finished", "open")
+properties:
+  formula.status:
+    displayName: Progress state
+views:
+  - type: table
+    name: Reading
+    order:
+      - file.name
+      - formula.status
+      - note.status
+      - status_code

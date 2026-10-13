@@ -1,0 +1,734 @@
+{
+ "slug": "bases-property-repair",
+ "module": "bases-property-repair/src/repair",
+ "function": "planBase",
+ "note": "planBase: args = [path, base file text, rename map {old: new}]; expected = status, reason or reasonStartsWith, result (the parsed YAML of the new text), changes as [where, before, after], notes as kinds. rewriteExpression (src/expr): args = [expression, map]; expected = text, changed, skipped, note kinds. applyScenario: args = [vault files {path: text}, map, edits made after the preview {path: text}]; it plans each .base file outside Restore, applies the edits, then applyPlans with every plan checked, folder Restore and stamp 2026-10-13 101500; expected = results as [path, status, copy] and the vault files after. validateMap: args = [pairs]; expected = problem sentences.",
+ "cases": [
+  {
+   "name": "AC1 filter note.status == \"done\" becomes note.state == \"done\"",
+   "function": "planBase",
+   "args": [
+    "Tasks.base",
+    "filters:\n  and:\n    - note.status == \"done\"\n",
+    {
+     "status": "state"
+    }
+   ],
+   "expected": {
+    "status": "change",
+    "result": {
+     "filters": {
+      "and": [
+       "note.state == \"done\""
+      ]
+     }
+    },
+    "changes": [
+     [
+      "filters.and[0]",
+      "note.status == \"done\"",
+      "note.state == \"done\""
+     ]
+    ],
+    "notes": []
+   }
+  },
+  {
+   "name": "AC2 the string \"status\" stays unchanged",
+   "function": "rewriteExpression",
+   "args": [
+    "status == \"status\"",
+    {
+     "status": "state"
+    }
+   ],
+   "expected": {
+    "text": "state == \"status\"",
+    "changed": 1,
+    "skipped": false,
+    "notes": []
+   }
+  },
+  {
+   "name": "AC3 only note[\"status\"] changes, formula.status and file.status stay",
+   "function": "rewriteExpression",
+   "args": [
+    "note[\"status\"] + formula.status + file.status",
+    {
+     "status": "state"
+    }
+   ],
+   "expected": {
+    "text": "note[\"state\"] + formula.status + file.status",
+    "changed": 1,
+    "skipped": false,
+    "notes": []
+   }
+  },
+  {
+   "name": "AC4 properties, order, sort and groupBy property IDs change",
+   "function": "planBase",
+   "args": [
+    "Tasks.base",
+    "properties:\n  status:\n    displayName: Status\n  file.name:\n    displayName: Name\nviews:\n  - type: table\n    name: All\n    order:\n      - file.name\n      - note.status\n    sort:\n      - property: note.status\n        direction: ASC\n    groupBy:\n      property: note.status\n      direction: DESC\n",
+    {
+     "status": "state"
+    }
+   ],
+   "expected": {
+    "status": "change",
+    "result": {
+     "properties": {
+      "state": {
+       "displayName": "Status"
+      },
+      "file.name": {
+       "displayName": "Name"
+      }
+     },
+     "views": [
+      {
+       "type": "table",
+       "name": "All",
+       "order": [
+        "file.name",
+        "note.state"
+       ],
+       "sort": [
+        {
+         "property": "note.state",
+         "direction": "ASC"
+        }
+       ],
+       "groupBy": {
+        "property": "note.state",
+        "direction": "DESC"
+       }
+      }
+     ]
+    },
+    "changes": [
+     [
+      "properties key",
+      "status",
+      "state"
+     ],
+     [
+      "views[0].order[1]",
+      "note.status",
+      "note.state"
+     ],
+     [
+      "views[0].sort[0].property",
+      "note.status",
+      "note.state"
+     ],
+     [
+      "views[0].groupBy.property",
+      "note.status",
+      "note.state"
+     ]
+    ],
+    "notes": []
+   }
+  },
+  {
+   "name": "AC5 status_code stays unchanged in an expression",
+   "function": "rewriteExpression",
+   "args": [
+    "status_code > 3 && note.status_code < 9",
+    {
+     "status": "state"
+    }
+   ],
+   "expected": {
+    "text": "status_code > 3 && note.status_code < 9",
+    "changed": 0,
+    "skipped": false,
+    "notes": []
+   }
+  },
+  {
+   "name": "AC5 status_code stays unchanged as a property ID",
+   "function": "planBase",
+   "args": [
+    "Tasks.base",
+    "views:\n  - type: table\n    order:\n      - status_code\n      - file.status\n",
+    {
+     "status": "state"
+    }
+   ],
+   "expected": {
+    "status": "none",
+    "changes": [],
+    "notes": []
+   }
+  },
+  {
+   "name": "AC6 computed note[key] gives a warning and no change in that expression",
+   "function": "rewriteExpression",
+   "args": [
+    "note[key] == \"x\" && note.status == \"y\"",
+    {
+     "status": "state"
+    }
+   ],
+   "expected": {
+    "text": "note[key] == \"x\" && note.status == \"y\"",
+    "changed": 0,
+    "skipped": true,
+    "notes": [
+     "computed"
+    ]
+   }
+  },
+  {
+   "name": "AC7 a new key with a space uses note[\"new key\"] in expressions",
+   "function": "rewriteExpression",
+   "args": [
+    "note.status == \"a\" && status != \"b\"",
+    {
+     "status": "new key"
+    }
+   ],
+   "expected": {
+    "text": "note[\"new key\"] == \"a\" && note[\"new key\"] != \"b\"",
+    "changed": 2,
+    "skipped": false,
+    "notes": []
+   }
+  },
+  {
+   "name": "AC7 a new key with a space is complete in stored property IDs",
+   "function": "planBase",
+   "args": [
+    "Tasks.base",
+    "properties:\n  status:\n    displayName: Status\nviews:\n  - type: table\n    order:\n      - note.status\n      - status\n",
+    {
+     "status": "new key"
+    }
+   ],
+   "expected": {
+    "status": "change",
+    "result": {
+     "properties": {
+      "new key": {
+       "displayName": "Status"
+      }
+     },
+     "views": [
+      {
+       "type": "table",
+       "order": [
+        "note.new key",
+        "new key"
+       ]
+      }
+     ]
+    },
+    "changes": [
+     [
+      "properties key",
+      "status",
+      "new key"
+     ],
+     [
+      "views[0].order[0]",
+      "note.status",
+      "note.new key"
+     ],
+     [
+      "views[0].order[1]",
+      "status",
+      "new key"
+     ]
+    ],
+    "notes": []
+   }
+  },
+  {
+   "name": "AC8 a file that changes after the preview is not written",
+   "function": "applyScenario",
+   "args": [
+    {
+     "Tasks.base": "filters:\n  and:\n    - status == \"done\"\n"
+    },
+    {
+     "status": "state"
+    },
+    {
+     "Tasks.base": "filters:\n  and:\n    - status == \"open\"\n"
+    }
+   ],
+   "expected": {
+    "results": [
+     [
+      "Tasks.base",
+      "stale"
+     ]
+    ],
+    "files": {
+     "Tasks.base": "filters:\n  and:\n    - status == \"open\"\n"
+    }
+   }
+  },
+  {
+   "name": "AC9 invalid YAML skips the file and gives the reason",
+   "function": "planBase",
+   "args": [
+    "Tasks.base",
+    "filters:\n  and:\n    - status == \"done\"\n  bad: [\n",
+    {
+     "status": "state"
+    }
+   ],
+   "expected": {
+    "status": "skip",
+    "reasonStartsWith": "Invalid YAML:",
+    "changes": [],
+    "notes": []
+   }
+  },
+  {
+   "name": "AC9 an existing target property setting skips the file",
+   "function": "planBase",
+   "args": [
+    "Tasks.base",
+    "properties:\n  status:\n    displayName: Status\n  note.state:\n    displayName: State\nfilters:\n  and:\n    - status == \"done\"\n",
+    {
+     "status": "state"
+    }
+   ],
+   "expected": {
+    "status": "skip",
+    "reason": "properties already has a setting for \"state\". Merge or remove it first.",
+    "changes": [],
+    "notes": []
+   }
+  },
+  {
+   "name": "AC10 a unique restore copy exists before the new text is written",
+   "function": "applyScenario",
+   "args": [
+    {
+     "Projects/Tasks.base": "views:\n  - type: table\n    order:\n      - status\n",
+     "Restore/Tasks 2026-10-13 101500.base": "old copy\n"
+    },
+    {
+     "status": "state"
+    },
+    {}
+   ],
+   "expected": {
+    "results": [
+     [
+      "Projects/Tasks.base",
+      "written",
+      "Restore/Tasks 2026-10-13 101500 2.base"
+     ]
+    ],
+    "files": {
+     "Projects/Tasks.base": "views:\n  - type: table\n    order:\n      - state\n",
+     "Restore/Tasks 2026-10-13 101500.base": "old copy\n",
+     "Restore/Tasks 2026-10-13 101500 2.base": "views:\n  - type: table\n    order:\n      - status\n"
+    }
+   }
+  },
+  {
+   "name": "method call on a property keeps the method name",
+   "function": "rewriteExpression",
+   "args": [
+    "status.contains(\"a\") && note.status.lower() == \"b\"",
+    {
+     "status": "state"
+    }
+   ],
+   "expected": {
+    "text": "state.contains(\"a\") && note.state.lower() == \"b\"",
+    "changed": 2,
+    "skipped": false,
+    "notes": []
+   }
+  },
+  {
+   "name": "string argument of a file method stays",
+   "function": "rewriteExpression",
+   "args": [
+    "file.hasTag(\"status\") || file.name == \"status\"",
+    {
+     "status": "state"
+    }
+   ],
+   "expected": {
+    "text": "file.hasTag(\"status\") || file.name == \"status\"",
+    "changed": 0,
+    "skipped": false,
+    "notes": []
+   }
+  },
+  {
+   "name": "regular expression text stays and division still works",
+   "function": "rewriteExpression",
+   "args": [
+    "status.matches(/status/i) && status / 2 > 1",
+    {
+     "status": "state"
+    }
+   ],
+   "expected": {
+    "text": "state.matches(/status/i) && state / 2 > 1",
+    "changed": 2,
+    "skipped": false,
+    "notes": []
+   }
+  },
+  {
+   "name": "unknown syntax stops changes in that expression",
+   "function": "rewriteExpression",
+   "args": [
+    "status == `done`",
+    {
+     "status": "state"
+    }
+   ],
+   "expected": {
+    "text": "status == `done`",
+    "changed": 0,
+    "skipped": true,
+    "notes": [
+     "unknown"
+    ]
+   }
+  },
+  {
+   "name": "this.status is listed and not changed",
+   "function": "rewriteExpression",
+   "args": [
+    "note.status == this.status",
+    {
+     "status": "state"
+    }
+   ],
+   "expected": {
+    "text": "note.state == this.status",
+    "changed": 1,
+    "skipped": false,
+    "notes": [
+     "this"
+    ]
+   }
+  },
+  {
+   "name": "a global function with the old key name is not a property",
+   "function": "rewriteExpression",
+   "args": [
+    "date(\"2026-01-01\") > date",
+    {
+     "date": "day"
+    }
+   ],
+   "expected": {
+    "text": "date(\"2026-01-01\") > day",
+    "changed": 1,
+    "skipped": false,
+    "notes": []
+   }
+  },
+  {
+   "name": "single quotes in note[...] stay single quotes",
+   "function": "rewriteExpression",
+   "args": [
+    "note['status'] != ''",
+    {
+     "status": "state"
+    }
+   ],
+   "expected": {
+    "text": "note['state'] != ''",
+    "changed": 1,
+    "skipped": false,
+    "notes": []
+   }
+  },
+  {
+   "name": "bare reserved word is not changed, note.value is",
+   "function": "rewriteExpression",
+   "args": [
+    "value > 2 && note.value < 5",
+    {
+     "value": "amount"
+    }
+   ],
+   "expected": {
+    "text": "value > 2 && note.amount < 5",
+    "changed": 1,
+    "skipped": false,
+    "notes": [
+     "ambiguous"
+    ]
+   }
+  },
+  {
+   "name": "formula names stay, formula text changes",
+   "function": "planBase",
+   "args": [
+    "Tasks.base",
+    "formulas:\n  score: status * 2\n  status: \"1\"\n",
+    {
+     "status": "state"
+    }
+   ],
+   "expected": {
+    "status": "change",
+    "result": {
+     "formulas": {
+      "score": "state * 2",
+      "status": "1"
+     }
+    },
+    "changes": [
+     [
+      "formulas.score",
+      "status * 2",
+      "state * 2"
+     ]
+    ],
+    "notes": []
+   }
+  },
+  {
+   "name": "nested or and not filters in a view change",
+   "function": "planBase",
+   "args": [
+    "Tasks.base",
+    "views:\n  - type: table\n    filters:\n      or:\n        - status == \"a\"\n        - not:\n            - note.status == \"b\"\n",
+    {
+     "status": "state"
+    }
+   ],
+   "expected": {
+    "status": "change",
+    "result": {
+     "views": [
+      {
+       "type": "table",
+       "filters": {
+        "or": [
+         "state == \"a\"",
+         {
+          "not": [
+           "note.state == \"b\""
+          ]
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "changes": [
+     [
+      "views[0].filters.or[0]",
+      "status == \"a\"",
+      "state == \"a\""
+     ],
+     [
+      "views[0].filters.or[1].not[0]",
+      "note.status == \"b\"",
+      "note.state == \"b\""
+     ]
+    ],
+    "notes": []
+   }
+  },
+  {
+   "name": "custom view option is listed and not changed",
+   "function": "planBase",
+   "args": [
+    "Tasks.base",
+    "views:\n  - type: table\n    columnSize:\n      note.status: 200\n",
+    {
+     "status": "state"
+    }
+   ],
+   "expected": {
+    "status": "none",
+    "changes": [],
+    "notes": [
+     "option"
+    ]
+   }
+  },
+  {
+   "name": "swap of two keys in one map has no clash",
+   "function": "planBase",
+   "args": [
+    "Tasks.base",
+    "properties:\n  status:\n    displayName: A\n  state:\n    displayName: B\n",
+    {
+     "status": "state",
+     "state": "status"
+    }
+   ],
+   "expected": {
+    "status": "change",
+    "result": {
+     "properties": {
+      "state": {
+       "displayName": "A"
+      },
+      "status": {
+       "displayName": "B"
+      }
+     }
+    },
+    "changes": [
+     [
+      "properties key",
+      "status",
+      "state"
+     ],
+     [
+      "properties key",
+      "state",
+      "status"
+     ]
+    ],
+    "notes": []
+   }
+  },
+  {
+   "name": "YAML comments give a note in the preview",
+   "function": "planBase",
+   "args": [
+    "Tasks.base",
+    "# team base\nviews:\n  - type: table\n    order:\n      - status # main column\n",
+    {
+     "status": "state"
+    }
+   ],
+   "expected": {
+    "status": "change",
+    "result": {
+     "views": [
+      {
+       "type": "table",
+       "order": [
+        "state"
+       ]
+      }
+     ]
+    },
+    "changes": [
+     [
+      "views[0].order[0]",
+      "status",
+      "state"
+     ]
+    ],
+    "notes": [
+     "comments"
+    ]
+   }
+  },
+  {
+   "name": "view summaries keys change",
+   "function": "planBase",
+   "args": [
+    "Tasks.base",
+    "views:\n  - type: table\n    summaries:\n      note.status: Unique\n",
+    {
+     "status": "state"
+    }
+   ],
+   "expected": {
+    "status": "change",
+    "result": {
+     "views": [
+      {
+       "type": "table",
+       "summaries": {
+        "note.state": "Unique"
+       }
+      }
+     ]
+    },
+    "changes": [
+     [
+      "views[0].summaries key",
+      "note.status",
+      "note.state"
+     ]
+    ],
+    "notes": []
+   }
+  },
+  {
+   "name": "an empty file has no change",
+   "function": "planBase",
+   "args": [
+    "Tasks.base",
+    "",
+    {
+     "status": "state"
+    }
+   ],
+   "expected": {
+    "status": "none",
+    "changes": [],
+    "notes": []
+   }
+  },
+  {
+   "name": "validateMap accepts a simple pair",
+   "function": "validateMap",
+   "args": [
+    [
+     {
+      "from": "status",
+      "to": "state"
+     }
+    ]
+   ],
+   "expected": []
+  },
+  {
+   "name": "validateMap refuses the same key and a prefix",
+   "function": "validateMap",
+   "args": [
+    [
+     {
+      "from": "status",
+      "to": "status"
+     },
+     {
+      "from": "note.a",
+      "to": "b"
+     }
+    ]
+   ],
+   "expected": [
+    "The new key for \"status\" is the same as the old key.",
+    "Enter \"note.a\" and \"b\" without a note., file., formula. or this. prefix."
+   ]
+  },
+  {
+   "name": "validateMap refuses two old keys with one new key",
+   "function": "validateMap",
+   "args": [
+    [
+     {
+      "from": "a",
+      "to": "c"
+     },
+     {
+      "from": "b",
+      "to": "c"
+     }
+    ]
+   ],
+   "expected": [
+    "Two old keys have the same new key \"c\"."
+   ]
+  }
+ ]
+}

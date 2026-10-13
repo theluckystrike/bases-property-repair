@@ -1,0 +1,6 @@
+filters:
+  and:
+    - status == "done"
+  bad: [unclosed
+views:
+  - type: table

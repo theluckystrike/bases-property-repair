@@ -1,0 +1,11 @@
+{
+	"id": "bases-property-repair",
+	"name": "Bases Property Repair",
+	"version": "1.0.0",
+	"minAppVersion": "1.13.4",
+	"description": "Repair exact property references in Base files after a property rename.",
+	"author": "Michael Lip",
+	"authorUrl": "https://github.com/theluckystrike",
+	"fundingUrl": "https://github.com/sponsors/theluckystrike",
+	"isDesktopOnly": false
+}

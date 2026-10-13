@@ -1,0 +1,10 @@
+properties:
+  status:
+    displayName: Status
+  state:
+    displayName: State
+views:
+  - type: table
+    order:
+      - status
+      - state

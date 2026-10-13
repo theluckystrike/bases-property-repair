@@ -1,0 +1,10 @@
+views:
+  - type: cards
+    name: Board
+    groupBy:
+      property: status
+      direction: ASC
+    image: note.cover
+    cardSize: 180
+    columnSize:
+      note.status: 160

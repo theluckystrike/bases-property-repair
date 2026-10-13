@@ -1,0 +1,9 @@
+formulas:
+  picked: note[field] == "done"
+  ready: status == "status"
+views:
+  - type: table
+    name: Computed
+    order:
+      - file.name
+      - formula.ready
