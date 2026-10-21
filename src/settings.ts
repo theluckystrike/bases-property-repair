@@ -2,6 +2,7 @@ import { PluginSettingTab, normalizePath, type SettingDefinitionItem } from 'obs
 import { sponsorsSettingItems } from './license/github-obsidian';
 import { PRO_UI, isPro } from './pro';
 import type BasesPropertyRepairPlugin from './main';
+import { helloSettingItems } from './hello/settings';
 
 export interface RenamePair {
 	from: string;
@@ -77,6 +78,11 @@ export class BasesPropertyRepairSettingTab extends PluginSettingTab {
 	}
 
 	getSettingDefinitions(): SettingDefinitionItem[] {
+		// The product rows, then the "More from NoteMods" card (packages/hello).
+		return [...this.productSettingDefinitions(), ...helloSettingItems()];
+	}
+
+	productSettingDefinitions(): SettingDefinitionItem[] {
 		return [
 			...(this.plugin.pro ? sponsorsSettingItems(this.plugin.pro, PRO_UI) : []),
 			{

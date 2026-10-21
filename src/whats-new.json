@@ -1,0 +1,27 @@
+{
+	"id": "bases-property-repair",
+	"name": "Bases Property Repair",
+	"version": "1.1.0",
+	"changes": [
+		"New Send feedback command. It opens a page where you can report a problem or suggest an idea."
+	],
+	"tip": "Rename the property in your notes first, then run 'Repair property references in base files' to update your bases.",
+	"thanks": "Hi, I am Michael, a solo developer in Poland. Bases Property Repair is one of over 100 small plugins that I make. Thank you for using it with Bases. Bases is still new, and your setups teach me a lot.",
+	"related": [
+		{
+			"id": "bases-multi-edit",
+			"name": "Bases Multi-Row Edit",
+			"blurb": "Set, append or remove a property on selected Bases rows with preview and undo."
+		},
+		{
+			"id": "property-change-ledger",
+			"name": "Property Change Ledger",
+			"blurb": "Record observed changes to selected note properties in a local history file."
+		},
+		{
+			"id": "bases-view-checkpoints",
+			"name": "Bases View Checkpoints",
+			"blurb": "Save the setup of a view and restore it after quick changes."
+		}
+	]
+}

@@ -81,6 +81,8 @@ Pro adds named rename maps with one or more key pairs, and the change journal wi
 
 ## Settings
 
+After a minor or major update, this plugin opens one What's new tab in the background. The tab and settings card suggest other NoteMods plugins and Zovo Chat and link to notemods.com for feedback ([privacy](https://notemods.com/privacy/)). The tab sends no data. Turn the tab off in Settings.
+
 | Setting | What it does |
 | --- | --- |
 | Restore copy folder | Vault folder for the restore copies. Default `Bases Property Repair/Restore copies`. The scan skips this folder. |
@@ -89,10 +91,6 @@ Pro adds named rename maps with one or more key pairs, and the change journal wi
 The plugin saves the folder, the saved maps and the journal (up to 200 entries) in its `data.json` file in your vault. The journal has the file path, the restore copy path, the keys and a short hash of the written text. It records entries in the free version too, so a new Pro user can restore earlier changes.
 
 ## FAQ
-
-### Does it rename the property in my notes?
-
-No. It changes Base files only. Use the property rename of Obsidian or another tool for the notes.
 
 ### Does it read Base code blocks inside Markdown notes?
 
