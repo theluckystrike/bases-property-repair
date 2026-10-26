@@ -1,7 +1,7 @@
 import { Notice, Plugin, TFile, normalizePath } from 'obsidian';
 import type { SponsorsManager } from './license/index';
 import { createGitHubSponsors } from './license/github-obsidian';
-import { SPONSORS, bindPro, isPro, resetPro } from './pro';
+import { SPONSORS, bindPro, isPro, proNotice, proText, resetPro } from './pro';
 import { applyPlans, planBase, textHash, validateMap, type ApplyResult, type FilePlan, type Store } from './repair';
 import { DEFAULT_SETTINGS, JOURNAL_MAX, BasesPropertyRepairSettingTab, normalizeSettings, type BasesPropertyRepairSettings, type JournalEntry, type RenamePair } from './settings';
 import { JournalModal, RepairModal } from './ui';
@@ -11,7 +11,7 @@ import WHATS_NEW from './whats-new.json';
 /** How often to ask the license state whether a check is due. It sends a request only when signed in and due (7 days). */
 const PRO_TICK_MS = 6 * 60 * 60 * 1000;
 
-export const PRO_NOTICE = 'This is a pro feature. Sponsor on GitHub, then sign in from the plugin settings.';
+export const PRO_LEAD = 'This is a pro feature.';
 
 /** "2026-10-13 101500" in local time, for restore copy names. */
 export function fileStamp(d: Date): string {
@@ -57,7 +57,7 @@ export default class BasesPropertyRepairPlugin extends Plugin {
 			id: 'show-journal',
 			name: 'Show the change journal',
 			callback: () => {
-				if (!isPro()) new Notice(PRO_NOTICE);
+				if (!isPro()) proNotice(PRO_LEAD);
 				else {
 					this.journalModal = new JournalModal(this.app, this);
 					this.journalModal.open();
@@ -176,7 +176,7 @@ export default class BasesPropertyRepairPlugin extends Plugin {
 
 	/** Pro: writes the restore copy back, but only while the file still has the text that the plugin wrote. */
 	async restore(entry: JournalEntry): Promise<string> {
-		if (!isPro()) return PRO_NOTICE;
+		if (!isPro()) return proText(PRO_LEAD);
 		if (entry.restored) return `${entry.path} is already restored.`;
 		const vault = this.app.vault;
 		const file = vault.getFileByPath(entry.path);
@@ -201,8 +201,8 @@ export default class BasesPropertyRepairPlugin extends Plugin {
 	/** Pro: restores the newest journal entry that is not restored. */
 	async restoreLast(): Promise<string> {
 		if (!isPro()) {
-			new Notice(PRO_NOTICE);
-			return PRO_NOTICE;
+			proNotice(PRO_LEAD);
+			return proText(PRO_LEAD);
 		}
 		const entry = [...this.settings.journal].reverse().find((e) => !e.restored);
 		const msg = entry ? await this.restore(entry) : 'The journal has no change to restore.';
@@ -212,7 +212,7 @@ export default class BasesPropertyRepairPlugin extends Plugin {
 
 	/** Pro: saves or replaces a named map. Returns a problem sentence or null. */
 	async saveMap(name: string, pairs: readonly RenamePair[]): Promise<string | null> {
-		if (!isPro()) return PRO_NOTICE;
+		if (!isPro()) return proText(PRO_LEAD);
 		const n = name.trim();
 		if (!n) return 'Enter a name for the map.';
 		const problems = validateMap(pairs);
