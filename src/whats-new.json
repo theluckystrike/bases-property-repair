@@ -1,8 +1,9 @@
 {
 	"id": "bases-property-repair",
 	"name": "Bases Property Repair",
-	"version": "1.1.1",
+	"version": "1.1.2",
 	"changes": [
+		"The Pro notice of Bases Property Repair now says that one payment turns on Pro in every NoteMods plugin.",
 		"The Pro notice for the change journal now has a Sponsor on GitHub button."
 	],
 	"tip": "Rename the property in your notes first, then run 'Repair property references in base files' to update your bases.",
